@@ -23,5 +23,10 @@ def cli_parser():
     show_default=True,
     help="Directory of the downloaded file (Wikipedia HTML dump)",
 )
-def parse(language, downloaded_file):
-    parse_wikitable_html.dump_wikitables(lang=language, input_file=downloaded_file)
+@click.option(
+    "-t", "--limit_table", default=0, show_default=True, help="Save # number of tables",
+)
+def parse(language, downloaded_file, limit_table):
+    parse_wikitable_html.dump_wikitables(
+        lang=language, input_file=downloaded_file, limit=limit_table
+    )

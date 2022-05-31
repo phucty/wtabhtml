@@ -14,9 +14,9 @@ def run_pipeline(wikipedia_version, langs):
             lang=lang, input_file=downloaded_file
         )
         # 3. Read the first three tables
-        parse_wikitable_html.read_wikitable_dumps(dump_file, limit=3)
+        parse_wikitable_html.read_wikitable_dumps(dump_file, limit=0)
     return
 
 
 if __name__ == "__main__":
-    run_pipeline(cf.DUMPS_VERSION_WP_HTML, ["cr"])
+    run_pipeline(cf.DUMPS_VERSION_WP_HTML, ["sc"])

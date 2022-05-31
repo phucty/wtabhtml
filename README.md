@@ -13,6 +13,8 @@ File format: JSON list. Each line is a json object of
     url: the url that link to Wikipedia page
     index: the index of table in the Wikipedia page
     html: html content of table
+    caption: table caption
+    aspects: (Hierachy sections of Wikipedia)  
 }
 ```
 

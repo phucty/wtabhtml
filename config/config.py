@@ -14,5 +14,8 @@ DIR_CONFIG = f"{DIR_ROOT}/config"
 # 322 languages of Wikipedia
 LANGS = iw.read_tsv_file_first_col(f"{DIR_CONFIG}/LANGS_322.tsv", ENCODING)
 
+HTML_HEADERS = iw.read_tsv_file_first_col(
+    f"{DIR_CONFIG}/TAGS_HTML_HEADERS.tsv", ENCODING
+)
 
 URL_WP_HTML = "https://dumps.wikimedia.org/other/enterprise_html/runs/{wikipedia_version}/{lang}wiki-NS0-{wikipedia_version}-ENTERPRISE-HTML.json.tar.gz"

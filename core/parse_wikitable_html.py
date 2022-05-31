@@ -1,4 +1,5 @@
 import bz2
+import json
 import os.path
 import re
 
@@ -8,8 +9,6 @@ from tqdm import tqdm
 
 from core.utils import io_worker as iw
 from config import config as cf
-from contextlib import closing
-from multiprocessing import Pool
 
 
 def extract_html_tables_from_html(html_content):
@@ -18,7 +17,39 @@ def extract_html_tables_from_html(html_content):
         return results
 
     soup = bs4.BeautifulSoup(html_content, "html.parser")
-    tables = soup.find_all("table", {"class": re.compile("wikitable*")})
+    html_tables = soup.find_all("table", {"class": re.compile("wikitable*")})
+    tables = []
+    for i, html_table in enumerate(html_tables):
+
+        # Check this table is a nested table or not
+        # We ignore the nested tables, just process wikitables do not have any wikitable inside
+        sub_wikitables = html_table.find("table", {"class": re.compile("wikitable*")})
+        if sub_wikitables:
+            continue
+
+        table = {"html": html_table}
+        # Get table caption
+        tag_caption = html_table.find("caption")
+        if tag_caption:
+            table["caption"] = tag_caption.get_text().strip()
+
+        # Get section hierarchy
+        cur = html_table
+        while True:
+            section = cur.find_parent("section")
+            if not section:
+                break
+            section_name = section.next
+            if section_name and section_name.name in cf.HTML_HEADERS:
+                if table.get("aspects") is None:
+                    table["aspects"] = []
+                table["aspects"].append(section_name.get_text())
+            cur = section
+
+        if table.get("aspects") and len(table["aspects"]) > 1:
+            table["aspects"] = table["aspects"][::-1]
+        tables.append(table)
+
     return tables
 
 
@@ -62,13 +93,21 @@ def pool_parse_html_source(line):
         return None
     table_objs = []
     for i, wikitable in enumerate(wikitables_html):
-        table_obj = {
-            "title": line.get("name"),
-            "url": line.get("url"),
-            "index": i,
-            "wikidata": line.get("wikidata"),
-            "html": add_css_wikitable(wikitable),
-        }
+        table_obj = {"index": i}
+
+        def update_dict(attr, value):
+            if value:
+                table_obj[attr] = value
+
+        update_dict("title", line.get("name"))
+        update_dict("url", line.get("url"))
+        update_dict("wikidata", line.get("wikidata"))
+        update_dict("html", wikitable.get("html"))
+        update_dict("caption", wikitable.get("caption"))
+        update_dict("aspects", wikitable.get("aspects"))
+
+        table_obj["html"] = add_css_wikitable(table_obj["html"])
+
         table_objs.append(table_obj)
     return table_objs
 
@@ -142,5 +181,4 @@ def read_wikitable_dumps(input_file: str, limit: int = 0):
     }
     """
     for i, table_obj in enumerate(iw.read_json_file(input_file, limit)):
-        print(f"{i}. Page " + table_obj["url"] + " - Index: " + str(table_obj["index"]))
-        print(table_obj["html"])
+        print(json.dumps(table_obj, indent=2, ensure_ascii=False))

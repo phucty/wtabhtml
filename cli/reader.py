@@ -16,5 +16,4 @@ def cli_reader():
     "--limit", "-l", default=0, help="Return first limit tables",
 )
 def read(input_file, limit):
-    click.echo("Parse Wikidata")
     read_wikitable_dumps(input_file, limit)

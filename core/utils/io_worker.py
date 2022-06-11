@@ -1,5 +1,6 @@
 import bz2
 import csv
+import fnmatch
 import gzip
 import logging
 import math
@@ -10,6 +11,7 @@ import zlib
 
 import numpy
 import ujson
+import tarfile
 
 
 def read_tsv_file_first_col(file_name, encoding):
@@ -28,18 +30,6 @@ def read_line_from_file(file_name, mode="r"):
     if reader:
         for line in reader:
             yield line
-
-
-def get_size_obj(num, suffix="B"):
-    if num == 0:
-        return "0"
-    magnitude = int(math.floor(math.log(num, 1024)))
-    val = num / math.pow(1024, magnitude)
-    if magnitude > 7:
-        return "{:3.1f}{}{}".format(val, "Yi", suffix)
-    return "{:3.1f}{}{}".format(
-        val, ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"][magnitude], suffix
-    )
 
 
 def print_status(message, is_screen=True, is_log=True) -> object:
@@ -202,3 +192,71 @@ def read_json_file(input_file: str, limit: int = 0):
         table_obj = ujson.loads(line)
         yield table_obj
     jsonFile.close()
+
+
+def get_files_from_dir_stream(folder_path, extension="*"):
+    for root, _, file_dirs in os.walk(folder_path):
+        for file_dir in fnmatch.filter(file_dirs, "*.%s" % extension):
+            if ".DS_Store" not in file_dir:
+                yield os.path.join(root, file_dir)
+
+
+def get_files_from_dir_subdir(folder_path, extension="*"):
+    all_files = []
+    for root, _, file_dirs in os.walk(folder_path):
+        for file_dir in fnmatch.filter(file_dirs, "*.%s" % extension):
+            if ".DS_Store" not in file_dir:
+                all_files.append(os.path.join(root, file_dir))
+    return all_files
+
+
+def get_files_from_dir(
+    folder_path, extension="*", limit_reader=-1, is_sort=False, reverse=False
+):
+    all_file_dirs = get_files_from_dir_subdir(folder_path, extension)
+
+    if is_sort:
+        file_with_size = [(f, os.path.getsize(f)) for f in all_file_dirs]
+        file_with_size.sort(key=lambda f: f[1], reverse=reverse)
+        all_file_dirs = [f for f, _ in file_with_size]
+    if limit_reader < 0:
+
+        limit_reader = len(all_file_dirs)
+    return all_file_dirs[:limit_reader]
+
+
+def compress_folder(input_folder, output_file):
+    if not os.path.exists(input_folder):
+        return
+    # input_files = get_files_from_dir(input_folder)
+
+    with tarfile.open(output_file, "w:bz2") as tar_handle:
+        for root, dirs, files in os.walk(input_folder):
+            for file in files:
+                tar_handle.add(
+                    os.path.join(root, file),
+                    arcname=os.path.join(root, file).replace(input_folder, ""),
+                )
+        # for file in input_files:
+        #     tar.add(file, arcname=os.path.basename(file), recursive=False)
+
+    delete_folder(input_folder)
+
+
+def merge_jsonl_files(input_folder):
+    if not os.path.exists(input_folder):
+        return
+    output_file = input_folder + ".jsonl.bz2"
+
+    file_writer = bz2.open(output_file, "wt")
+    n = 0
+    input_files = get_files_from_dir(input_folder)
+    for input_file in input_files:
+        for line in read_json_file(input_file):
+            file_writer.write(ujson.dumps(line))
+            file_writer.write("\n")
+            n += 1
+
+    file_writer.close()
+    delete_folder(input_folder)
+    return n

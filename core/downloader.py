@@ -34,8 +34,10 @@ def download_wikipedia_html_dump(wikipedia_version=cf.DUMPS_VERSION_WP_HTML, lan
     # Download Wikipedia dumps
     url = cf.URL_WP_HTML.format(wikipedia_version=wikipedia_version, lang=lang)
     downloaded_file = download_file(url)
+
     if downloaded_file:
-        print(f"Downloaded: {url}")
+        downloaded_size = iw.get_size_of_file(os.path.getsize(downloaded_file))
+        print(f"Downloaded: {downloaded_size} - {downloaded_file}")
     else:
         print(f"Error: {url}")
     return downloaded_file

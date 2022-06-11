@@ -29,6 +29,10 @@ python wtabhtml.py parse -l cr
 python wtabhtml.py read -l 1 -i ./data/models/cr.jsonl.bz2 
 ```
 
+```shell
+python wtabhtml.py dump -l cr
+```
+
 ### Example:
 ```shell
 python run.py

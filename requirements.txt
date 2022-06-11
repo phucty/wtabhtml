@@ -22,3 +22,8 @@ tqdm == 4.64.0
 # wtabhtml/core/parse_wikitable_html.py: 6
 # wtabhtml/core/utils/io_worker.py: 12
 ujson == 5.3.0
+
+zlib~=1.2.12
+opencv-python~=4.6.0.66
+selenium~=4.2.0
+beautifulsoup4~=4.11.1

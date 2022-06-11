@@ -8,7 +8,7 @@ ENCODING = "utf-8"
 
 # Directories
 DIR_DUMPS = f"{DIR_ROOT}/data/dump"
-DIR_MODELS = f"{DIR_ROOT}/data/models1"
+DIR_MODELS = f"{DIR_ROOT}/data/models"
 DIR_CONFIG = f"{DIR_ROOT}/config"
 
 # 322 languages of Wikipedia

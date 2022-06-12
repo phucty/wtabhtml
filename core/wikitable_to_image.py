@@ -451,17 +451,23 @@ def read_json_tables(input_file, error_file, save_dir, split_name, chunk):
 
 
 def gen_images(
-    lang="ja", start_id=None, end_id=None, n_threads=8, split_name="train",
+    wikipedia_version=cf.DUMPS_VERSION_WP_HTML,
+    lang="ja",
+    start_id=None,
+    end_id=None,
+    n_threads=8,
+    split_name="train",
+    compress=False,
+    delete_org=False,
 ):
     start = time.time()
     input_file = f"{cf.DIR_MODELS}/wikitables_html_pubtabnet/{lang}.jsonl.bz2"
     if not os.path.exists(input_file):
+        iw.print_status(f"Missing jsonl file: {input_file}")
         from cli.pipeline import run_dump
 
         run_dump(
-            wikipedia_version=cf.DUMPS_VERSION_WP_HTML,
-            language=lang,
-            n_threads=n_threads,
+            wikipedia_version=wikipedia_version, language=lang, n_threads=n_threads,
         )
         if not os.path.exists(input_file):
 
@@ -492,8 +498,14 @@ def gen_images(
     n_errors = merge_jsonl_files(save_errors[:-1])
     n_images = len(os.listdir(save_split_name)) // 2
 
-    iw.compress_folder(
-        input_folder=save_lang, output_file=f"{save_root}{lang}.tar.bz2",
-    )
-
+    if compress:
+        output_file_compressed = f"{save_root}{lang}.tar.bz2"
+        iw.compress_folder(
+            input_folder=save_lang,
+            output_file=output_file_compressed,
+            delete_org=delete_org,
+        )
+        iw.print_status(f"Output file: {output_file_compressed}")
+    else:
+        iw.print_status(f"Output dataset folder: {save_lang}")
     return n_errors, n_images, time.time() - start

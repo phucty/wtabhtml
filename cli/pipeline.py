@@ -67,6 +67,13 @@ def dump_json(wikipedia_version, language, n_threads):
 
 @cli_pipeline.command()
 @click.option(
+    "-p",
+    "--wikipedia_version",
+    default=cf.DUMPS_VERSION_WP_HTML,
+    show_default=True,
+    help="Version of Wikipedia HTML dump. Find at https://dumps.wikimedia.org/other/enterprise_html/runs/",
+)
+@click.option(
     "-l",
     "--language",
     default="all",
@@ -76,7 +83,21 @@ def dump_json(wikipedia_version, language, n_threads):
 @click.option(
     "-n", "--n_threads", default=1, show_default=True, help="Run n multiprocessors",
 )
-def gen_images(language, n_threads):
+@click.option(
+    "-c",
+    "--compress",
+    default=False,
+    show_default=True,
+    help="Compress the output dataset or not",
+)
+@click.option(
+    "-d",
+    "--delete_org",
+    default=False,
+    show_default=True,
+    help="Delete the original folder after compressing",
+)
+def gen_images(wikipedia_version, language, n_threads, compress, delete_org):
     if language != "all":
         languages = [language]
     else:
@@ -85,7 +106,11 @@ def gen_images(language, n_threads):
     iw.print_status(f"No\tLang\tImages\tErrors\tRunTime")
     for i, language in enumerate(reversed(languages)):
         n_errors, n_images, run_time = wikitable_to_image.gen_images(
-            lang=language, n_threads=n_threads
+            wikipedia_version=wikipedia_version,
+            lang=language,
+            n_threads=n_threads,
+            compress=compress,
+            delete_org=delete_org,
         )
         iw.print_status(
             f"{i + 1}\t{language}\t{n_images:,}\t{n_errors:,}\t{run_time:.2f}"

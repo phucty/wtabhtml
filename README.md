@@ -19,17 +19,22 @@ File format: JSON list. Each line is a json object of
 ```
 
 ### Usage:
-Download, Extract, and dump wikitables in CR language
+#### Download, Extract, and dump wikitables in CR language
 ```shell
 python wtabhtml.py dump -l cr
 ```
 
-Download, Extract, dump wikitables, and generate table images in CR language
+#### Download, Extract, dump wikitables, and generate table images in CR language 
+
 ```shell
 python wtabhtml.py gen-images -l cr -n 3
 ```
+Note: User can download our [preprocessed dumps](https://drive.google.com/drive/folders/1wU5zdHcb3egxpwyluZCqVBIZnSanUwqN?usp=sharing) then, copy all {LANGUAGE}.jsonl.bz2 (the wikitables dump in PubTabNet format) to `wtabhtml/data/models/wikitables_html_pubtabnet` to generate photo images faster.
 
-Pipeline of Wikitable processing in cr language
+
+If user want to re-run all pipeline, the tool will download Wikipedia HTML dump, extract wikitables, and dump it to `wtabhtml/data/models/wikitables_html_pubtabnet\{LANGUAGE}.jsonl.bz2` file as the following pipeline.
+
+#### Pipeline of Wikitable processing in cr language
 ```shell
 # Download dump
 python wtabhtml.py download -l cr

@@ -225,7 +225,7 @@ def get_files_from_dir(
     return all_file_dirs[:limit_reader]
 
 
-def compress_folder(input_folder, output_file):
+def compress_folder(input_folder, output_file, delete_org=False):
     if not os.path.exists(input_folder):
         return
     # input_files = get_files_from_dir(input_folder)
@@ -239,8 +239,8 @@ def compress_folder(input_folder, output_file):
                 )
         # for file in input_files:
         #     tar.add(file, arcname=os.path.basename(file), recursive=False)
-
-    delete_folder(input_folder)
+    if delete_org:
+        delete_folder(input_folder)
 
 
 def merge_jsonl_files(input_folder):
